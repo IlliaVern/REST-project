@@ -30,6 +30,21 @@ export const showUserPosts = ({ params }, res, next) =>
     .then(success(res))
     .catch(next);
 
+export const showNearUsers = (
+  { querymen: { query, select, cursor } },
+  res,
+  next
+) =>
+  User.count(query)
+    .then((count) =>
+      User.find(query, select, cursor).then((users) => ({
+        count,
+        rows: users.map((user) => user.view(full)),
+      }))
+    )
+    .then(success(res))
+    .catch(next);
+
 export const create = ({ bodymen: { body } }, res, next) =>
   User.create(body)
     .then((user) => user.view(true))

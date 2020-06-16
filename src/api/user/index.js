@@ -11,6 +11,7 @@ import {
   showMe,
   show,
   showUserPosts,
+  showNearUsers,
   create,
   update,
   updatePassword,
@@ -60,10 +61,20 @@ router.get("/:id", show);
  * @apiName RetrieveUserPosts
  * @apiGroup User
  * @apiPermission public
+ * @apiSuccess {Object} near user's user data.
+ * @apiError 404 User's near users not found.
+ */
+router.get("/:id/posts", showUserPosts);
+
+/**
+ * @api {get} /users/:id/near Retrieve users near user's location
+ * @apiName RetrieveUser'sNearUsers
+ * @apiGroup User
+ * @apiPermission user
  * @apiSuccess {Object} user posts data.
  * @apiError 404 User's posts not found.
  */
-router.get("/:id/posts", showUserPosts);
+router.get("/:id/near", token({ required: true }), showNearUsers);
 
 /**
  * @api {post} /users Create user
