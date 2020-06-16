@@ -1,12 +1,13 @@
 {
   "parser": "babel-eslint",
-  "extends": ["prettier"],
+  "extends": ["standart", "prettier"],
   "env": {
     "jest": true,
     "jasmine": true
   },
   "plugins": ["prettier"],
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": ["error", {"semi": false}]
+
   }
 }
