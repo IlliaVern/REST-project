@@ -1,8 +1,6 @@
 {
   "parser": "babel-eslint",
-  "extends": [
-    "prettier"
-  ],
+  "extends": ["prettier"],
   "env": {
     "jest": true,
     "jasmine": true
