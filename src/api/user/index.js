@@ -77,7 +77,7 @@ router.get("/:id/posts", showUserPosts);
 router.get(
   "/:id/friends",
   token({ required: true }),
-  query({}, { near: true }),
+  query({ near: { paths: ["location.coordinates"] } }, { near: true }),
   showNearUsers
 );
 

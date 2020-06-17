@@ -37,7 +37,7 @@ export const showNearUsers = (
 ) =>
   User.count(query)
     .then((count) =>
-      User.find(query, select, cursor).then((users) => ({
+      User.find(query).then((users) => ({
         rows: users.map((user) => user.view(true)),
         count,
       }))
