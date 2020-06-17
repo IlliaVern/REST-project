@@ -61,8 +61,8 @@ router.get("/:id", show);
  * @apiName RetrieveUserPosts
  * @apiGroup User
  * @apiPermission public
- * @apiSuccess {Object} near user's user data.
- * @apiError 404 User's near users not found.
+ * @apiSuccess {Object} user posts data.
+ * @apiError 404 User's posts not found.
  */
 router.get("/:id/posts", showUserPosts);
 
@@ -71,10 +71,15 @@ router.get("/:id/posts", showUserPosts);
  * @apiName RetrieveUser'sNearUsers
  * @apiGroup User
  * @apiPermission user
- * @apiSuccess {Object} user posts data.
- * @apiError 404 User's posts not found.
+ * @apiSuccess {Object} near user's user data.
+ * @apiError 404 User's near users not found.
  */
-router.get("/:id/near", token({ required: true }), showNearUsers);
+router.get(
+  "/:id/friends",
+  token({ required: true }),
+  query({}, { near: true }),
+  showNearUsers
+);
 
 /**
  * @api {post} /users Create user

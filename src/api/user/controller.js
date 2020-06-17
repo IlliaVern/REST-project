@@ -6,18 +6,18 @@ export const index = ({ querymen: { query, select, cursor } }, res, next) =>
   User.count(query)
     .then((count) =>
       User.find(query, select, cursor).then((users) => ({
-        rows: users.map((user) => user.view()),
+        rows: users.map((user) => user.view(true)),
         count,
       }))
     )
-    .then(success(res))
+    .then(success(res, 200))
     .catch(next);
 
 export const show = ({ params }, res, next) =>
   User.findById(params.id)
     .then(notFound(res))
     .then((user) => (user ? user.view() : null))
-    .then(success(res))
+    .then(success(res, 200))
     .catch(next);
 
 export const showMe = ({ user }, res) => res.json(user.view(true));
@@ -27,7 +27,7 @@ export const showUserPosts = ({ params }, res, next) =>
     // .populate('createdBy')
     .then(notFound(res))
     .then((posts) => posts.map((post) => post.view()))
-    .then(success(res))
+    .then(success(res, 200))
     .catch(next);
 
 export const showNearUsers = (
@@ -38,11 +38,11 @@ export const showNearUsers = (
   User.count(query)
     .then((count) =>
       User.find(query, select, cursor).then((users) => ({
+        rows: users.map((user) => user.view(true)),
         count,
-        rows: users.map((user) => user.view(full)),
       }))
     )
-    .then(success(res))
+    .then(success(res, 200))
     .catch(next);
 
 export const create = ({ bodymen: { body } }, res, next) =>
@@ -80,7 +80,7 @@ export const update = ({ bodymen: { body }, params, user }, res, next) =>
     })
     .then((user) => (user ? Object.assign(user, body).save() : null))
     .then((user) => (user ? user.view(true) : null))
-    .then(success(res))
+    .then(success(res, 201))
     .catch(next);
 
 export const updatePassword = (
@@ -107,7 +107,7 @@ export const updatePassword = (
       user ? user.set({ password: body.password }).save() : null
     )
     .then((user) => (user ? user.view(true) : null))
-    .then(success(res))
+    .then(success(res, 201))
     .catch(next);
 
 export const destroy = ({ params }, res, next) =>
