@@ -118,7 +118,12 @@ router.post(
  * @apiError 401 Current user or admin access only.
  * @apiError 404 User not found.
  */
-router.put("/:id", token({ required: true }), body({ name, picture }), update);
+router.put(
+  "/:id",
+  token({ required: true }),
+  body({ name, picture, location }),
+  update
+);
 
 /**
  * @api {put} /users/:id/password Update password
