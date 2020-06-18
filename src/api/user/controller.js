@@ -30,11 +30,7 @@ export const showUserPosts = ({ params }, res, next) =>
     .then(success(res, 200))
     .catch(next);
 
-export const showNearUsers = (
-  { querymen: { query, select, cursor } },
-  res,
-  next
-) =>
+export const showNearUsers = ({ querymen: { query } }, res, next) =>
   User.count(query)
     .then((count) =>
       User.find(query).then((users) => ({
@@ -45,12 +41,38 @@ export const showNearUsers = (
     .then(success(res, 200))
     .catch(next);
 
-export const create = ({ bodymen: { body } }, res, next) =>
+export const create = ({ bodymen: { body } }, res, next) => {
+  const createAdminUser = body.role === "admin";
+  if (!createAdminUser) {
+    User.create(body)
+      .then((user) => user.view(true))
+      .then(success(res, 201))
+      .catch((err) => {
+        /* istanbul ignore else */
+        if (err.name === "MongoError" && err.code === 11000) {
+          res.status(409).json({
+            valid: false,
+            param: "email",
+            message: "email already registered",
+          });
+        } else {
+          next(err);
+        }
+      });
+  } else {
+    res.status(401).json({
+      valid: false,
+      message: "You can't create Admin user",
+    });
+    return null;
+  }
+};
+
+export const adminCreate = ({ bodymen: { body } }, res, next) =>
   User.create(body)
     .then((user) => user.view(true))
     .then(success(res, 201))
     .catch((err) => {
-      /* istanbul ignore else */
       if (err.name === "MongoError" && err.code === 11000) {
         res.status(409).json({
           valid: false,
