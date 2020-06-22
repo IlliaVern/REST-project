@@ -3,7 +3,7 @@ import { env, mongo, port, ip, apiRoot } from "./config";
 import mongoose from "./services/mongoose";
 import express from "./services/express";
 import api from "./api";
-import isAdmin from "./services/checkForOrCreateAdmin";
+import checkForOrCreateAdmin from "./services/middleware";
 
 const app = express(apiRoot, api);
 const server = http.createServer(app);
@@ -16,7 +16,7 @@ mongoose.Promise = Promise;
 setImmediate(() => {
   server.listen(port, ip, () => {
     //checking if Admin exists. If no => creating HercAdmin with default email & password
-    isAdmin();
+    checkForOrCreateAdmin();
     console.log(
       "Express server listening on http://%s:%d, in %s mode",
       ip,

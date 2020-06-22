@@ -4,6 +4,7 @@ import { middleware as body } from "bodymen";
 import {
   password as passwordAuth,
   master,
+  masterOrToken,
   token,
 } from "../../services/passport";
 import {
@@ -13,7 +14,7 @@ import {
   showUserPosts,
   showNearUsers,
   create,
-  adminCreate,
+  // adminCreate,
   update,
   updatePassword,
   destroy,
@@ -101,32 +102,9 @@ router.get(
  */
 router.post(
   "/",
-  master(),
+  masterOrToken({ required: true }),
   body({ email, password, name, picture, role, location }),
   create
-);
-
-/**
- * @api {post} /users/:id Create new "admin" role user
- * @apiName AdminCreateUser
- * @apiGroup User
- * @apiPermission admin
- * @apiParam {String} access_token HercAdmin User access_token.
- * @apiParam {String} email Admin User's email.
- * @apiParam {String{6..}} password Admin User's password.
- * @apiParam {String} [name] Admin User's name.
- * @apiParam {String} [picture] Admin User's picture.
- * @apiParam {String=admin, user} [role=user] Admin User's role.
- * @apiSuccess (Sucess 201) {Object} Admin user User's data.
- * @apiError {Object} 400 Some parameters may contain invalid values.
- * @apiError 401 Master access only.
- * @apiError 409 Email already registered.
- */
-router.post(
-  "/:id",
-  token({ required: true, roles: ["admin"] }),
-  body({ email, password, name, picture, role }),
-  adminCreate
 );
 
 /**

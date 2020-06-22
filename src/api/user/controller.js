@@ -24,7 +24,6 @@ export const showMe = ({ user }, res) => res.json(user.view(true));
 
 export const showUserPosts = ({ params }, res, next) =>
   Posts.find({ createdBy: params.id })
-    // .populate('createdBy')
     .then(notFound(res))
     .then((posts) => posts.map((post) => post.view()))
     .then(success(res, 200))
@@ -41,14 +40,28 @@ export const showNearUsers = ({ querymen: { query } }, res, next) =>
     .then(success(res, 200))
     .catch(next);
 
-export const create = ({ bodymen: { body } }, res, next) => {
-  const createAdminUser = body.role === "admin";
-  if (!createAdminUser) {
+export const create = ({ bodymen: { body }, user }, res, next) => {
+  const isCreateAdminUser = body.role === "admin";
+  if (!user._id && !isCreateAdminUser) {
     User.create(body)
       .then((user) => user.view(true))
       .then(success(res, 201))
       .catch((err) => {
-        /* istanbul ignore else */
+        if (err.name === "MongoError" && err.code === 11000) {
+          res.status(409).json({
+            valid: false,
+            param: email,
+            message: "email already registered",
+          });
+        } else {
+          next(err);
+        }
+      });
+  } else if (user.role === "admin") {
+    User.create(body)
+      .then((user) => user.view(true))
+      .then(success(res, 201))
+      .catch((err) => {
         if (err.name === "MongoError" && err.code === 11000) {
           res.status(409).json({
             valid: false,
@@ -62,27 +75,11 @@ export const create = ({ bodymen: { body } }, res, next) => {
   } else {
     res.status(401).json({
       valid: false,
-      message: "You can't create Admin user",
+      message: `You can't create ${body.role} role user`,
     });
     return null;
   }
 };
-
-export const adminCreate = ({ bodymen: { body } }, res, next) =>
-  User.create(body)
-    .then((user) => user.view(true))
-    .then(success(res, 201))
-    .catch((err) => {
-      if (err.name === "MongoError" && err.code === 11000) {
-        res.status(409).json({
-          valid: false,
-          param: "email",
-          message: "email already registered",
-        });
-      } else {
-        next(err);
-      }
-    });
 
 export const update = ({ bodymen: { body }, params, user }, res, next) =>
   User.findById(params.id === "me" ? user.id : params.id)

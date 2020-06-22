@@ -1,4 +1,4 @@
-import { success, notFound } from "../response";
+import { success } from "../response";
 import { User } from "../../api/user";
 
 import { defaultAdminEmail, defaultAdminPassword } from "../../config";
@@ -8,7 +8,7 @@ export default function isAdmin(res) {
     .then((user) => {
       if (!user)
         User.create({
-          name: "Herc Admin",
+          name: "HercAdmin",
           email: defaultAdminEmail,
           password: defaultAdminPassword,
           role: "admin",
@@ -17,3 +17,15 @@ export default function isAdmin(res) {
     .then(success(res, 201))
     .catch((err) => new Error());
 }
+
+// export const needRole = (requiredRole) => {
+//   return (req, res, next) => {
+//     if (req.currentUser.role === requiredRole) {
+//       return next()
+//     } else {
+//       return res.status(401).json({
+//         message: 'Action not allowed'
+//       })
+//     }
+//   }
+// }
