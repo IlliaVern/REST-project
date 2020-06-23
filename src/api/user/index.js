@@ -13,8 +13,9 @@ import {
   show,
   showUserPosts,
   showNearUsers,
+  sendCodeToUserPhone,
+  checkCodeFromUserPhone,
   create,
-  // adminCreate,
   update,
   updatePassword,
   destroy,
@@ -23,7 +24,7 @@ import { schema } from "./model";
 export User, { schema } from "./model";
 
 const router = new Router();
-const { email, password, name, picture, role, location } = schema.tree;
+const { email, password, name, picture, role, phone, location } = schema.tree;
 
 /**
  * @api {get} /users Retrieve users
@@ -84,6 +85,20 @@ router.get(
 );
 
 /**
+ * @api {get} /users/verify Send verification code to user's phone
+ * @apiName Send Verification Code
+ * @apiGroup User
+ * @apiPermission user
+ * @apiSuccess {Object} data of sending verification code.
+ * @apiError 404 User's phone verification code sending failure.
+ */
+router.get(
+  "/verify",
+  token({ required: true, roles: ["admin", "user"] }),
+  sendCodeToUserPhone
+);
+
+/**
  * @api {post} /users Create user
  * @apiName CreateUser
  * @apiGroup User
@@ -103,9 +118,11 @@ router.get(
 router.post(
   "/",
   masterOrToken({ required: true }),
-  body({ email, password, name, picture, role, location }),
+  body({ email, password, name, picture, role, phone, location }),
   create
 );
+
+router.post("/verify", token({ required: true }), checkCodeFromUserPhone);
 
 /**
  * @api {put} /users/:id Update user

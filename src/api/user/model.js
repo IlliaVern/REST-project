@@ -31,6 +31,18 @@ const userSchema = new Schema(
       enum: roles,
       default: "user",
     },
+    phone: {
+      type: String,
+      required: true,
+    },
+    verificationMethod: {
+      type: String,
+      default: "sms",
+    },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
     picture: {
       type: String,
       trim: true,
@@ -89,7 +101,14 @@ userSchema.methods = {
     let fields = ["id", "name", "picture"];
 
     if (full) {
-      fields = [...fields, "email", "createdAt", "location"];
+      fields = [
+        ...fields,
+        "email",
+        "phone",
+        "verified",
+        "createdAt",
+        "location",
+      ];
     }
 
     fields.forEach((field) => {

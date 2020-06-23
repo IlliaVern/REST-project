@@ -1,6 +1,12 @@
-import { success, notFound } from "../../services/response/";
 import { User } from ".";
 import { Posts } from "../posts/index.js";
+import {
+  twilioAccountSid,
+  twilioAuthToken,
+  twilioVerifSid,
+} from "../../config";
+const twilio = require("twilio")(twilioAccountSid, twilioAuthToken);
+import { success, notFound } from "../../services/response/";
 
 export const index = ({ querymen: { query, select, cursor } }, res, next) =>
   User.count(query)
@@ -39,6 +45,22 @@ export const showNearUsers = ({ querymen: { query } }, res, next) =>
     )
     .then(success(res, 200))
     .catch(next);
+
+export const sendCodeToUserPhone = ({ user }, res) => {
+  User.findOne({ _id: user.id })
+    .then((user) => {
+      twilio.verify
+        .services(twilioVerifSid)
+        .verifications.create({
+          to: user.phone,
+          channel: user.verificationMethod,
+        })
+        .then((data) => {
+          res.send(data);
+        });
+    })
+    .then(success(res, 200));
+};
 
 export const create = ({ bodymen: { body }, user }, res, next) => {
   const isCreateAdminUser = body.role === "admin";
@@ -79,6 +101,24 @@ export const create = ({ bodymen: { body }, user }, res, next) => {
     });
     return null;
   }
+};
+
+export const checkCodeFromUserPhone = (
+  { bodymen: { body }, user },
+  res,
+  next
+) => {
+  twilio.verify
+    .services(twilioVerifSid)
+    .verificationChecks.create({
+      to: user.phone,
+      code: body.code,
+    })
+    .then((data) => {
+      res.send(data);
+    })
+    .then(success(res, 200))
+    .catch(next);
 };
 
 export const update = ({ bodymen: { body }, params, user }, res, next) =>

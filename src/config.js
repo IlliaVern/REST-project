@@ -32,6 +32,9 @@ const config = {
     jwtSecret: requireProcessEnv("JWT_SECRET"),
     defaultAdminEmail: requireProcessEnv("DEF_ADMIN_EMAIL"),
     defaultAdminPassword: requireProcessEnv("DEF_ADMIN_PASSWORD"),
+    twilioAccountSid: requireProcessEnv("TWILIO_ACCOUNT_SID"),
+    twilioAuthToken: requireProcessEnv("TWILIO_AUTH_TOKEN"),
+    twilioVerifSid: requireProcessEnv("TWILIO_VERIF_SID"),
     mongo: {
       options: {
         useUnifiedTopology: true,
