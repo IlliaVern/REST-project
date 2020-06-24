@@ -100,11 +100,7 @@ router.get(
  * @apiSuccess {Object} data of sending verification code.
  * @apiError 404 User's phone verification code sending failure.
  */
-router.post(
-  "/sendCode",
-  token({ required: true, roles: ["admin", "user"] }),
-  sendCode
-);
+router.post("/sendCode", token({ required: true }), sendCode);
 
 /**
  * @api {post} /users Create user

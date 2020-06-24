@@ -1,9 +1,14 @@
-import { success } from "../response";
+import { success, notFound } from "../response";
 import { User } from "../../api/user";
+import schedule from "node-schedule";
 
-import { defaultAdminEmail, defaultAdminPassword } from "../../config";
+import {
+  defaultAdminEmail,
+  defaultAdminPassword,
+  defaultAdminPhone,
+} from "../../config";
 
-export default function isAdmin(res) {
+export function checkForOrCreateAdmin(res) {
   User.findOne({ role: "admin" })
     .then((user) => {
       if (!user)
@@ -11,6 +16,7 @@ export default function isAdmin(res) {
           name: "HercAdmin",
           email: defaultAdminEmail,
           password: defaultAdminPassword,
+          phone: defaultAdminPhone,
           role: "admin",
         });
     })
@@ -18,14 +24,11 @@ export default function isAdmin(res) {
     .catch((err) => new Error());
 }
 
-// export const needRole = (requiredRole) => {
-//   return (req, res, next) => {
-//     if (req.currentUser.role === requiredRole) {
-//       return next()
-//     } else {
-//       return res.status(401).json({
-//         message: 'Action not allowed'
-//       })
-//     }
-//   }
-// }
+export const runSchedules = async (res) => {
+  await schedule.scheduleJob("41 16 * * 0-6", async () => {
+    await User.deleteMany({ verified: "false" })
+      .then(notFound(res))
+      .then(success(res, 204))
+      .catch((err) => new Error());
+  });
+};
