@@ -35,6 +35,7 @@ const config = {
     twilioAccountSid: requireProcessEnv("TWILIO_ACCOUNT_SID"),
     twilioAuthToken: requireProcessEnv("TWILIO_AUTH_TOKEN"),
     twilioVerifSid: requireProcessEnv("TWILIO_VERIF_SID"),
+    twilioPhoneNumber: requireProcessEnv("TWILIO_PHONE-NUMBER"),
     mongo: {
       options: {
         useUnifiedTopology: true,

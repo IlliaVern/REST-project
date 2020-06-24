@@ -4,6 +4,7 @@ import {
   twilioAccountSid,
   twilioAuthToken,
   twilioVerifSid,
+  twilioPhoneNumber,
 } from "../../config";
 const twilio = require("twilio")(twilioAccountSid, twilioAuthToken);
 import { success, notFound } from "../../services/response/";
@@ -46,20 +47,29 @@ export const showNearUsers = ({ querymen: { query } }, res, next) =>
     .then(success(res, 200))
     .catch(next);
 
-export const sendCodeToUserPhone = ({ user }, res) => {
-  User.findOne({ _id: user.id })
-    .then((user) => {
-      twilio.verify
-        .services(twilioVerifSid)
-        .verifications.create({
-          to: user.phone,
-          channel: user.verificationMethod,
-        })
-        .then((data) => {
-          res.send(data);
-        });
+// export const sendCodeToUserPhone = ({ user }, res) => {
+export const sendCodeToUserPhone = () => {
+  twilio.messages
+    .create({
+      body: "Test sms",
+      from: twilioPhoneNumber,
+      to: "+380950000229",
     })
-    .then(success(res, 200));
+    .then((message) => console.log(message))
+    .catch((err) => console.log(err));
+  // User.findOne({ _id: user.id })
+  //   .then((user) => {
+  // twilio.verify
+  //   .services(twilioVerifSid)
+  //   .verifications.create({
+  //     to: user.phone,
+  //     channel: user.verificationMethod,
+  //   })
+  //   .then((data) => {
+  //     res.send(data);
+  //   });
+  // })
+  // .then(success(res, 200));
 };
 
 export const create = ({ bodymen: { body }, user }, res, next) => {
