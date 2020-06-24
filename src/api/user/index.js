@@ -3,7 +3,6 @@ import { middleware as query } from "querymen";
 import { middleware as body } from "bodymen";
 import {
   password as passwordAuth,
-  master,
   masterOrToken,
   token,
 } from "../../services/passport";
@@ -13,8 +12,8 @@ import {
   show,
   showUserPosts,
   showNearUsers,
-  sendCodeToUserPhone,
-  checkCodeFromUserPhone,
+  sendCode,
+  verifyCode,
   create,
   update,
   updatePassword,
@@ -24,7 +23,16 @@ import { schema } from "./model";
 export User, { schema } from "./model";
 
 const router = new Router();
-const { email, password, name, picture, role, phone, location } = schema.tree;
+const {
+  email,
+  password,
+  name,
+  picture,
+  role,
+  phone,
+  location,
+  code,
+} = schema.tree;
 
 /**
  * @api {get} /users Retrieve users
@@ -92,10 +100,10 @@ router.get(
  * @apiSuccess {Object} data of sending verification code.
  * @apiError 404 User's phone verification code sending failure.
  */
-router.get(
-  "/verify",
+router.post(
+  "/sendCode",
   token({ required: true, roles: ["admin", "user"] }),
-  sendCodeToUserPhone
+  sendCode
 );
 
 /**
@@ -122,7 +130,12 @@ router.post(
   create
 );
 
-router.post("/verify", token({ required: true }), checkCodeFromUserPhone);
+router.post(
+  "/verifyCode",
+  token({ required: true }),
+  body({ code }),
+  verifyCode
+);
 
 /**
  * @api {put} /users/:id Update user

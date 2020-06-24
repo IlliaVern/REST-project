@@ -4,7 +4,6 @@ import {
   twilioAccountSid,
   twilioAuthToken,
   twilioVerifSid,
-  twilioPhoneNumber,
 } from "../../config";
 const twilio = require("twilio")(twilioAccountSid, twilioAuthToken);
 import { success, notFound } from "../../services/response/";
@@ -47,29 +46,15 @@ export const showNearUsers = ({ querymen: { query } }, res, next) =>
     .then(success(res, 200))
     .catch(next);
 
-// export const sendCodeToUserPhone = ({ user }, res) => {
-export const sendCodeToUserPhone = () => {
-  twilio.messages
-    .create({
-      body: "Test sms",
-      from: twilioPhoneNumber,
-      to: "+380950000229",
+export const sendCode = ({ user }, res, next) => {
+  twilio.verify
+    .services(twilioVerifSid)
+    .verifications.create({
+      to: user.phone,
+      channel: user.verificationMethod,
     })
-    .then((message) => console.log(message))
-    .catch((err) => console.log(err));
-  // User.findOne({ _id: user.id })
-  //   .then((user) => {
-  // twilio.verify
-  //   .services(twilioVerifSid)
-  //   .verifications.create({
-  //     to: user.phone,
-  //     channel: user.verificationMethod,
-  //   })
-  //   .then((data) => {
-  //     res.send(data);
-  //   });
-  // })
-  // .then(success(res, 200));
+    .then(success(res, 200))
+    .catch(next);
 };
 
 export const create = ({ bodymen: { body }, user }, res, next) => {
@@ -113,21 +98,19 @@ export const create = ({ bodymen: { body }, user }, res, next) => {
   }
 };
 
-export const checkCodeFromUserPhone = (
-  { bodymen: { body }, user },
-  res,
-  next
-) => {
+export const verifyCode = ({ bodymen: { body }, user }, res, next) => {
   twilio.verify
     .services(twilioVerifSid)
     .verificationChecks.create({
-      to: user.phone,
       code: body.code,
+      to: user.phone,
     })
     .then((data) => {
-      res.send(data);
+      if (data.status === "approved") {
+        user.verified = true;
+        user.save().then(success(res, 200));
+      }
     })
-    .then(success(res, 200))
     .catch(next);
 };
 
