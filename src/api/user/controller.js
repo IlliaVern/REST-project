@@ -46,15 +46,19 @@ export const showNearUsers = ({ querymen: { query } }, res, next) =>
     .then(success(res, 200))
     .catch(next);
 
-export const sendCode = ({ user }, res, next) => {
-  twilio.verify
-    .services(twilioVerifSid)
-    .verifications.create({
-      to: user.phone,
-      channel: user.verificationMethod,
-    })
-    .then(success(res, 200))
-    .catch(next);
+export const sendCode = async ({ user }, res) => {
+  if (user.verified !== true) {
+    try {
+      await twilio.verify.services(twilioVerifSid).verifications.create({
+        to: user.phone,
+        channel: user.verificationMethod,
+      });
+    } catch (err) {
+      return res.status(500).send(e);
+    }
+    return res.status(200).send(`Message send to ${user.phone}`);
+  }
+  return res.status(500).send(`${user.name} you have been already verified`);
 };
 
 export const create = ({ bodymen: { body }, user }, res, next) => {
@@ -98,20 +102,27 @@ export const create = ({ bodymen: { body }, user }, res, next) => {
   }
 };
 
-export const verifyCode = ({ bodymen: { body }, user }, res, next) => {
-  twilio.verify
-    .services(twilioVerifSid)
-    .verificationChecks.create({
-      code: body.code,
-      to: user.phone,
-    })
-    .then((data) => {
-      if (data.status === "approved") {
-        user.verified = true;
-        user.save().then(success(res, 200));
-      }
-    })
-    .catch(next);
+export const verifyCode = async ({ bodymen: { body }, user }, res) => {
+  let verificationResult;
+  try {
+    verificationResult = await twilio.verify
+      .services(twilioVerifSid)
+      .verificationChecks.create({
+        code: body.code,
+        to: user.phone,
+      });
+  } catch (e) {
+    return res.status(500).send(e);
+  }
+
+  if (verificationResult.status === "approved") {
+    user.verified = true;
+    await user.save();
+    return res.status(200).send(`${user.name}, you are verified`);
+  }
+  res
+    .status(500)
+    .send(`Unable to verify code. Status: ${verificationResult.status}`);
 };
 
 export const update = ({ bodymen: { body }, params, user }, res, next) =>
