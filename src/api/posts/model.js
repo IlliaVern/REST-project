@@ -1,24 +1,29 @@
 import mongoose, { Schema } from 'mongoose'
 
-const postsSchema = new Schema({
-  createdBy: {
-    type: Schema.ObjectId,
-    ref: 'User',
-    required: true
+const postsSchema = new Schema(
+  {
+    createdBy: {
+      type: Schema.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    title: {
+      type: String
+    }
   },
-  title: {
-    type: String
+  {
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: (obj, ret) => {
+        delete ret._id
+      }
+    }
   }
-}, {
-  timestamps: true,
-  toJSON: {
-    virtuals: true,
-    transform: (obj, ret) => { delete ret._id }
-  }
-})
+)
 
 postsSchema.methods = {
-  view (full) {
+  view(full) {
     const view = {
       // simple view
       id: this.id,
@@ -28,10 +33,12 @@ postsSchema.methods = {
       updatedAt: this.updatedAt
     }
 
-    return full ? {
-      ...view
-      // add properties for a full view
-    } : view
+    return full
+      ? {
+          ...view
+          // add properties for a full view
+        }
+      : view
   }
 }
 

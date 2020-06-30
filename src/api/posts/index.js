@@ -21,10 +21,7 @@ const { title } = schema.tree
  * @apiError 404 Posts not found.
  * @apiError 401 user access only.
  */
-router.post('/',
-  token({ required: true }),
-  body({ title }),
-  create)
+router.post('/', token({ required: true }), body({ title }), create)
 
 /**
  * @api {get} /posts Retrieve posts
@@ -35,9 +32,7 @@ router.post('/',
  * @apiSuccess {Object[]} rows List of posts.
  * @apiError {Object} 400 Some parameters may contain invalid values.
  */
-router.get('/',
-  query(),
-  index)
+router.get('/', query(), index)
 
 /**
  * @api {get} /posts/:id Retrieve posts
@@ -47,8 +42,7 @@ router.get('/',
  * @apiError {Object} 400 Some parameters may contain invalid values.
  * @apiError 404 Posts not found.
  */
-router.get('/:id',
-  show)
+router.get('/:id', show)
 
 /**
  * @api {put} /posts/:id Update posts
@@ -62,10 +56,7 @@ router.get('/:id',
  * @apiError 404 Posts not found.
  * @apiError 401 user access only.
  */
-router.put('/:id',
-  token({ required: true }),
-  body({ title }),
-  update)
+router.put('/:id', token({ required: true }), body({ title }), update)
 
 /**
  * @api {delete} /posts/:id Delete posts
@@ -77,8 +68,6 @@ router.put('/:id',
  * @apiError 404 Posts not found.
  * @apiError 401 user access only.
  */
-router.delete('/:id',
-  token({ required: true }),
-  destroy)
+router.delete('/:id', token({ required: true }), destroy)
 
 export default router

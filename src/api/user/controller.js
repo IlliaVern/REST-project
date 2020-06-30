@@ -1,11 +1,48 @@
 import { User } from '.'
 import { Posts } from '../posts/index.js'
+import { FriendRequest } from '../friendRequest/index.js'
 import { twilioAccountSid, twilioAuthToken, twilioVerifSid } from '../../config'
 const twilio = require('twilio')(twilioAccountSid, twilioAuthToken)
 import { success, notFound } from '../../services/response/'
 
+export const showUserFriends = ({ user }, res, next) => {
+  User.find({ _id: { $all: user.friends } })
+    .then(notFound(res))
+    .then((friends) => friends.map((friend) => friend.view()))
+    .then(success(res, 200))
+    .catch(next)
+}
+
+export const createFriendRequest = async ({ user, params }, res) => {
+  try {
+    const request = await FriendRequest.create({
+      requester: user._id,
+      recipient: params.addToFriendUserId
+    })
+    await User.findOneAndUpdate(
+      { _id: user._id },
+      { $addToSet: { friendsRequests: request._id } },
+      { new: true }
+    )
+    await User.findOneAndUpdate(
+      { _id: params.addToFriendUserId },
+      { $addToSet: { friendsRequests: request._id } },
+      { new: true }
+    )
+  } catch (err) {
+    return res.status(400).json({
+      valid: false,
+      message: `Sending request failure. Error: ${err}`
+    })
+  }
+  return res.status(201).json({
+    valid: true,
+    message: 'Request successfully sended'
+  })
+}
+
 export const index = ({ querymen: { query, select, cursor } }, res, next) =>
-  User.count(query)
+  User.countDocuments(query)
     .then((count) =>
       User.find(query, select, cursor).then((users) => ({
         rows: users.map((user) => user.view(true)),

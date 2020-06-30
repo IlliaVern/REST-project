@@ -12,9 +12,11 @@ import {
   show,
   showUserPosts,
   showNearUsers,
+  showUserFriends,
   sendCode,
   verifyCode,
   create,
+  createFriendRequest,
   update,
   updatePassword,
   destroy
@@ -34,6 +36,17 @@ const {
   code
 } = schema.tree
 
+// Show User's friends
+router.get('/friends', token({ required: true }), showUserFriends)
+
+router.post(
+  '/friends/:addToFriendUserId',
+  token({ required: true }),
+  createFriendRequest
+)
+
+// router.put('/:friendRequestId', token({required: true}), )
+
 /**
  * @api {get} /users Retrieve users
  * @apiName RetrieveUsers
@@ -45,7 +58,12 @@ const {
  * @apiError {Object} 400 Some parameters may contain invalid values.
  * @apiError 401 Admin access only.
  */
-router.get('/', token({ required: true, roles: ['admin'] }), query(), index)
+router.get(
+  '/',
+  token({ required: true, roles: ['admin', 'users'] }),
+  query(),
+  index
+)
 
 /**
  * @api {get} /users/me Retrieve current user
@@ -86,7 +104,7 @@ router.get('/:id/posts', showUserPosts)
  * @apiError 404 User's near users not found.
  */
 router.get(
-  '/:id/friends',
+  '/:id/nearUsers',
   token({ required: true }),
   query({ near: { paths: ['location.coordinates'] } }, { near: true }),
   showNearUsers
