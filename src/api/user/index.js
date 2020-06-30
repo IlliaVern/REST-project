@@ -1,11 +1,11 @@
-import { Router } from "express";
-import { middleware as query } from "querymen";
-import { middleware as body } from "bodymen";
+import { Router } from 'express'
+import { middleware as query } from 'querymen'
+import { middleware as body } from 'bodymen'
 import {
   password as passwordAuth,
   masterOrToken,
-  token,
-} from "../../services/passport";
+  token
+} from '../../services/passport'
 import {
   index,
   showMe,
@@ -17,12 +17,12 @@ import {
   create,
   update,
   updatePassword,
-  destroy,
-} from "./controller";
-import { schema } from "./model";
-export User, { schema } from "./model";
+  destroy
+} from './controller'
+import { schema } from './model'
+export User, { schema } from './model'
 
-const router = new Router();
+const router = new Router()
 const {
   email,
   password,
@@ -31,8 +31,8 @@ const {
   role,
   phone,
   location,
-  code,
-} = schema.tree;
+  code
+} = schema.tree
 
 /**
  * @api {get} /users Retrieve users
@@ -45,7 +45,7 @@ const {
  * @apiError {Object} 400 Some parameters may contain invalid values.
  * @apiError 401 Admin access only.
  */
-router.get("/", token({ required: true, roles: ["admin"] }), query(), index);
+router.get('/', token({ required: true, roles: ['admin'] }), query(), index)
 
 /**
  * @api {get} /users/me Retrieve current user
@@ -55,7 +55,7 @@ router.get("/", token({ required: true, roles: ["admin"] }), query(), index);
  * @apiParam {String} access_token User access_token.
  * @apiSuccess {Object} user User's data.
  */
-router.get("/me", token({ required: true }), showMe);
+router.get('/me', token({ required: true }), showMe)
 
 /**
  * @api {get} /users/:id Retrieve user
@@ -65,7 +65,7 @@ router.get("/me", token({ required: true }), showMe);
  * @apiSuccess {Object} user User's data.
  * @apiError 404 User not found.
  */
-router.get("/:id", show);
+router.get('/:id', show)
 
 /**
  * @api {get} /users/:id/posts Retrieve user's posts
@@ -75,7 +75,7 @@ router.get("/:id", show);
  * @apiSuccess {Object} user posts data.
  * @apiError 404 User's posts not found.
  */
-router.get("/:id/posts", showUserPosts);
+router.get('/:id/posts', showUserPosts)
 
 /**
  * @api {get} /users/:id/near Retrieve users near user's location
@@ -86,21 +86,22 @@ router.get("/:id/posts", showUserPosts);
  * @apiError 404 User's near users not found.
  */
 router.get(
-  "/:id/friends",
+  '/:id/friends',
   token({ required: true }),
-  query({ near: { paths: ["location.coordinates"] } }, { near: true }),
+  query({ near: { paths: ['location.coordinates'] } }, { near: true }),
   showNearUsers
-);
+)
 
 /**
- * @api {get} /users/verify Send verification code to user's phone
+ * @api {get} /users/sendCode Send verification code to user's phone
  * @apiName Send Verification Code
  * @apiGroup User
  * @apiPermission user
  * @apiSuccess {Object} data of sending verification code.
- * @apiError 404 User's phone verification code sending failure.
+ * @apiError 400 User's phone verification code sending failure.
+ * @apiError 418 User has been already verified.
  */
-router.post("/sendCode", token({ required: true }), sendCode);
+router.post('/sendCode', token({ required: true }), sendCode)
 
 /**
  * @api {post} /users Create user
@@ -120,18 +121,27 @@ router.post("/sendCode", token({ required: true }), sendCode);
  * @apiError 409 Email already registered.
  */
 router.post(
-  "/",
+  '/',
   masterOrToken({ required: true }),
   body({ email, password, name, picture, role, phone, location }),
   create
-);
+)
 
+/**
+ * @api {get} /users/verifyCode Verify sended to user's phone code
+ * @apiName Check Verification Code
+ * @apiGroup User
+ * @apiPermission user
+ * @apiSuccess {Object} data of verification code.
+ * @apiError 400 User's verification code check failure.
+ * @apiError 400 Unable to verify verification code.
+ */
 router.post(
-  "/verifyCode",
+  '/verifyCode',
   token({ required: true }),
   body({ code }),
   verifyCode
-);
+)
 
 /**
  * @api {put} /users/:id Update user
@@ -147,11 +157,11 @@ router.post(
  * @apiError 404 User not found.
  */
 router.put(
-  "/:id",
+  '/:id',
   token({ required: true }),
   body({ name, picture, location }),
   update
-);
+)
 
 /**
  * @api {put} /users/:id/password Update password
@@ -164,7 +174,7 @@ router.put(
  * @apiError 401 Current user access only.
  * @apiError 404 User not found.
  */
-router.put("/:id/password", passwordAuth(), body({ password }), updatePassword);
+router.put('/:id/password', passwordAuth(), body({ password }), updatePassword)
 
 /**
  * @api {delete} /users/:id Delete user
@@ -176,6 +186,6 @@ router.put("/:id/password", passwordAuth(), body({ password }), updatePassword);
  * @apiError 401 Admin access only.
  * @apiError 404 User not found.
  */
-router.delete("/:id", token({ required: true, roles: ["admin"] }), destroy);
+router.delete('/:id', token({ required: true, roles: ['admin'] }), destroy)
 
-export default router;
+export default router
