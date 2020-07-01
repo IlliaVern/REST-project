@@ -15,25 +15,66 @@ export const showUserFriends = ({ user }, res, next) => {
 
 export const sendFriendRequest = async ({ user, params }, res) => {
   try {
-    const request = await FriendRequest.create({
-      requester: user._id,
-      recipient: params.addToFriendUserId
+    let existedRequest = await FriendRequest.findOne({
+      $and: [{ requester: user._id }, { recipient: params.addToFriendUserId }]
     })
-    await User.updateMany(
-      { _id: { $in: [user._id, params.addToFriendUserId] } },
-      { $addToSet: { friendsRequests: request._id } },
-      { new: true }
-    )
+    if (existedRequest.status === 'pending') {
+      return res.status(418).json({
+        valid: false,
+        message: 'You have already sended request to that user'
+      })
+    } else {
+      const request = await FriendRequest.create({
+        requester: user._id,
+        recipient: params.addToFriendUserId
+      })
+      await User.updateMany(
+        { _id: { $in: [user._id, params.addToFriendUserId] } },
+        { $addToSet: { friendsRequests: request._id } },
+        { new: true }
+      )
+      return res.status(201).json({
+        valid: true,
+        message: 'Request successfully sended'
+      })
+    }
   } catch (err) {
     return res.status(400).json({
       valid: false,
       message: `Sending request failure. Error: ${err}`
     })
   }
-  return res.status(201).json({
-    valid: true,
-    message: 'Request successfully sended'
-  })
+
+  // let existedRequest = await FriendRequest.findOne({
+  //   $and: [{ requester: user._id }, { recipient: params.addToFriendUserId }]
+  // })
+  // if (existedRequest.status === 'pending') {
+  //   res.status(418).json({
+  //     valid: false,
+  //     message: 'You have already sended request to that user'
+  //   })
+  // } else {
+  //   try {
+  //     const request = await FriendRequest.create({
+  //       requester: user._id,
+  //       recipient: params.addToFriendUserId
+  //     })
+  //     await User.updateMany(
+  //       { _id: { $in: [user._id, params.addToFriendUserId] } },
+  //       { $addToSet: { friendsRequests: request._id } },
+  //       { new: true }
+  //     )
+  //   } catch (err) {
+  //     return res.status(400).json({
+  //       valid: false,
+  //       message: `Sending request failure. Error: ${err}`
+  //     })
+  //   }
+  //   return res.status(201).json({
+  //     valid: true,
+  //     message: 'Request successfully sended'
+  //   })
+  // }
 }
 
 export const index = ({ querymen: { query, select, cursor } }, res, next) =>
