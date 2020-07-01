@@ -13,19 +13,14 @@ export const showUserFriends = ({ user }, res, next) => {
     .catch(next)
 }
 
-export const createFriendRequest = async ({ user, params }, res) => {
+export const sendFriendRequest = async ({ user, params }, res) => {
   try {
     const request = await FriendRequest.create({
       requester: user._id,
       recipient: params.addToFriendUserId
     })
-    await User.findOneAndUpdate(
-      { _id: user._id },
-      { $addToSet: { friendsRequests: request._id } },
-      { new: true }
-    )
-    await User.findOneAndUpdate(
-      { _id: params.addToFriendUserId },
+    await User.updateMany(
+      { _id: { $in: [user._id, params.addToFriendUserId] } },
       { $addToSet: { friendsRequests: request._id } },
       { new: true }
     )

@@ -16,7 +16,7 @@ import {
   sendCode,
   verifyCode,
   create,
-  createFriendRequest,
+  sendFriendRequest,
   update,
   updatePassword,
   destroy
@@ -42,7 +42,7 @@ router.get('/friends', token({ required: true }), showUserFriends)
 router.post(
   '/friends/:addToFriendUserId',
   token({ required: true }),
-  createFriendRequest
+  sendFriendRequest
 )
 
 // router.put('/:friendRequestId', token({required: true}), )
