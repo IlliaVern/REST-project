@@ -18,21 +18,20 @@ export const sendFriendRequest = async ({ user, params }, res) => {
     let existedRequest = await FriendRequest.findOne({
       $and: [{ requester: user._id }, { recipient: params.addToFriendUserId }]
     })
-    if (existedRequest.status === 'pending') {
+    let isFriends = await User.findOne({
+      _id: { $all: user.friends }
+    })
+    if (existedRequest || isFriends) {
       return res.status(418).json({
         valid: false,
-        message: 'You have already sended request to that user'
+        message:
+          'You have already sended request to that user or you are friends'
       })
     } else {
-      const request = await FriendRequest.create({
+      await FriendRequest.create({
         requester: user._id,
         recipient: params.addToFriendUserId
       })
-      await User.updateMany(
-        { _id: { $in: [user._id, params.addToFriendUserId] } },
-        { $addToSet: { friendsRequests: request._id } },
-        { new: true }
-      )
       return res.status(201).json({
         valid: true,
         message: 'Request successfully sended'

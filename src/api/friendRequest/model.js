@@ -13,11 +13,27 @@ const friendRequestSchema = new Schema({
   },
   status: {
     type: String,
-    required: true,
-    enums: ['accepted', 'denied', 'pending'],
+    enums: ['accept', 'reject', 'pending'],
     default: 'pending'
   }
 })
+
+friendRequestSchema.methods = {
+  view(full) {
+    const view = {}
+    let fields = ['id', 'requester', 'recipient']
+
+    if (full) {
+      fields = [...fields, 'status']
+    }
+
+    fields.forEach((field) => {
+      view[field] = this[field]
+    })
+
+    return view
+  }
+}
 
 const model = mongoose.model('FriendRequest', friendRequestSchema)
 

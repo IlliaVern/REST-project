@@ -45,8 +45,6 @@ router.post(
   sendFriendRequest
 )
 
-// router.put('/:friendRequestId', token({required: true}), )
-
 /**
  * @api {get} /users Retrieve users
  * @apiName RetrieveUsers
