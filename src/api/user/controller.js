@@ -16,10 +16,10 @@ export const showUserFriends = ({ user }, res, next) => {
 export const sendFriendRequest = async ({ user, params }, res) => {
   try {
     let existedRequest = await FriendRequest.findOne({
-      $and: [{ requester: user._id }, { recipient: params.addToFriendUserId }]
+      $and: [{ requester: user._id }, { recipient: params.id }]
     })
     let isFriends = await User.findOne({
-      _id: { $all: user.friends }
+      friends: { $all: [params.id] }
     })
     if (existedRequest || isFriends) {
       return res.status(418).json({
@@ -30,7 +30,7 @@ export const sendFriendRequest = async ({ user, params }, res) => {
     } else {
       await FriendRequest.create({
         requester: user._id,
-        recipient: params.addToFriendUserId
+        recipient: params.id
       })
       return res.status(201).json({
         valid: true,
@@ -44,6 +44,16 @@ export const sendFriendRequest = async ({ user, params }, res) => {
     })
   }
 }
+
+export const deleteFriend = ({ params, user }, res, next) =>
+  User.findByIdAndUpdate(
+    { _id: user._id },
+    { $pull: { friends: params.id } },
+    { new: true }
+  )
+    .then(notFound(res))
+    .then(success(res, 204))
+    .catch(next)
 
 export const index = ({ querymen: { query, select, cursor } }, res, next) =>
   User.countDocuments(query)

@@ -19,7 +19,8 @@ import {
   sendFriendRequest,
   update,
   updatePassword,
-  destroy
+  destroy,
+  deleteFriend
 } from './controller'
 import { schema } from './model'
 export User, { schema } from './model'
@@ -38,12 +39,10 @@ const {
 
 // Show User's friends
 router.get('/friends', token({ required: true }), showUserFriends)
-
-router.post(
-  '/friends/:addToFriendUserId',
-  token({ required: true }),
-  sendFriendRequest
-)
+// Send friendship request
+router.post('/friends/:id', token({ required: true }), sendFriendRequest)
+// Delete user from friends
+router.patch('/friends/:id', token({ required: true }), deleteFriend)
 
 /**
  * @api {get} /users Retrieve users

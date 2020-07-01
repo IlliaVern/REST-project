@@ -15,6 +15,8 @@ export const considerFriendRequest = async ({ body, params, user }, res) => {
     let request = await FriendRequest.findOneAndDelete({
       _id: params.friendRequestId
     })
+    console.log(request)
+    // Accept friendship request
     if (body.status === 'accept') {
       await User.findOneAndUpdate(
         { _id: user._id },
@@ -31,12 +33,6 @@ export const considerFriendRequest = async ({ body, params, user }, res) => {
         message: 'Added to friends'
       })
     } else {
-      // body.status === 'reject'
-      await User.updateMany(
-        { _id: { $in: [user._id, request.requester] } },
-        { $pull: { friendsRequests: params.friendRequestId } },
-        { new: true }
-      )
       return res.status(200).json({
         valid: true,
         message: 'Request rejected'
