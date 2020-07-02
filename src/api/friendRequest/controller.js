@@ -15,9 +15,10 @@ export const considerFriendRequest = async ({ body, params, user }, res) => {
     let request = await FriendRequest.findOneAndDelete({
       _id: params.friendRequestId
     })
-    console.log(request)
-    // Accept friendship request
-    if (body.status === 'accept') {
+    let id1 = user._id.toString()
+    let id2 = request.requester.toString()
+
+    if (id1 !== id2 && body.status === 'accept') {
       await User.findOneAndUpdate(
         { _id: user._id },
         { $push: { friends: request.requester } },
@@ -33,6 +34,7 @@ export const considerFriendRequest = async ({ body, params, user }, res) => {
         message: 'Added to friends'
       })
     } else {
+      // Reject friendship request
       return res.status(200).json({
         valid: true,
         message: 'Request rejected'
@@ -41,7 +43,7 @@ export const considerFriendRequest = async ({ body, params, user }, res) => {
   } catch (err) {
     return res.status(400).json({
       valid: false,
-      message: 'Something go wrong. Try one more time'
+      message: 'Something go wrong. Try again later'
     })
   }
 }

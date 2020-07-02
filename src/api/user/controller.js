@@ -21,7 +21,7 @@ export const sendFriendRequest = async ({ user, params }, res) => {
     let isFriends = await User.findOne({
       friends: { $all: [params.id] }
     })
-    if (existedRequest || isFriends) {
+    if (existedRequest || isFriends || user._id == params.id) {
       return res.status(418).json({
         valid: false,
         message:
@@ -45,15 +45,38 @@ export const sendFriendRequest = async ({ user, params }, res) => {
   }
 }
 
-export const deleteFriend = ({ params, user }, res, next) =>
-  User.findByIdAndUpdate(
-    { _id: user._id },
-    { $pull: { friends: params.id } },
-    { new: true }
-  )
-    .then(notFound(res))
-    .then(success(res, 204))
-    .catch(next)
+export const deleteFriend = async ({ params, user }, res) => {
+  try {
+    let id1 = user._id.toString()
+    let id2 = params.id.toString()
+    if (id1 === id2) {
+      return res.status(418).json({
+        valid: false,
+        message: 'Deleting failure'
+      })
+    } else {
+      await User.findOneAndUpdate(
+        { _id: user._id },
+        { $pull: { friends: id2 } },
+        { new: true }
+      )
+      await User.findOneAndUpdate(
+        { _id: params.id },
+        { $pull: { friends: id1 } },
+        { new: true }
+      )
+      return res.status(200).json({
+        valid: true,
+        message: 'Deleted from friends'
+      })
+    }
+  } catch (err) {
+    return res.status(400).json({
+      valid: false,
+      message: 'Something go wrong. Try again later'
+    })
+  }
+}
 
 export const index = ({ querymen: { query, select, cursor } }, res, next) =>
   User.countDocuments(query)
