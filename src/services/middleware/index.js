@@ -25,7 +25,7 @@ export function checkForOrCreateAdmin(res) {
 }
 
 export const runSchedules = async (res) => {
-  schedule.scheduleJob('11 12 * * 0-6', async () => {
+  schedule.scheduleJob('11 13 * * *', async () => {
     await User.deleteMany({ verified: 'false' })
       .then(notFound(res))
       .then(success(res, 204))

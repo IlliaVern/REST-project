@@ -10,13 +10,13 @@ const friendRequestSchema = new Schema({
     type: Schema.ObjectId,
     ref: 'User',
     required: true
-  },
-  status: {
-    type: String,
-    required: true,
-    // enums: ['accept', 'reject', 'pending'],
-    default: 'pending'
   }
+  // status: {
+  //   type: String,
+  //   required: true,
+  //   // enums: ['accept', 'reject', 'pending'],
+  //   default: 'pending'
+  // }
 })
 
 friendRequestSchema.methods = {

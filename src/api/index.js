@@ -3,7 +3,7 @@ import user from './user'
 import auth from './auth'
 import passwordReset from './password-reset'
 import posts from './posts'
-import friendRequest from './friendRequest'
+import friendRequest from './friend-request'
 
 const router = new Router()
 

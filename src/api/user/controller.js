@@ -1,82 +1,8 @@
 import { User } from '.'
 import { Posts } from '../posts/index.js'
-import { FriendRequest } from '../friendRequest/index.js'
 import { twilioAccountSid, twilioAuthToken, twilioVerifSid } from '../../config'
 const twilio = require('twilio')(twilioAccountSid, twilioAuthToken)
 import { success, notFound } from '../../services/response/'
-
-export const showUserFriends = ({ user }, res, next) => {
-  User.find({ _id: { $all: user.friends } })
-    .then(notFound(res))
-    .then((friends) => friends.map((friend) => friend.view()))
-    .then(success(res, 200))
-    .catch(next)
-}
-
-export const sendFriendRequest = async ({ user, params }, res) => {
-  try {
-    let existedRequest = await FriendRequest.findOne({
-      $and: [{ requester: user._id }, { recipient: params.id }]
-    })
-    let isFriends = await User.findOne({
-      friends: { $all: [params.id] }
-    })
-    if (existedRequest || isFriends || user._id == params.id) {
-      return res.status(418).json({
-        valid: false,
-        message:
-          'You have already sended request to that user or you are friends'
-      })
-    } else {
-      await FriendRequest.create({
-        requester: user._id,
-        recipient: params.id
-      })
-      return res.status(201).json({
-        valid: true,
-        message: 'Request successfully sended'
-      })
-    }
-  } catch (err) {
-    return res.status(400).json({
-      valid: false,
-      message: `Sending request failure. Error: ${err}`
-    })
-  }
-}
-
-export const deleteFriend = async ({ params, user }, res) => {
-  try {
-    let id1 = user._id.toString()
-    let id2 = params.id.toString()
-    if (id1 === id2) {
-      return res.status(418).json({
-        valid: false,
-        message: 'Deleting failure'
-      })
-    } else {
-      await User.findOneAndUpdate(
-        { _id: user._id },
-        { $pull: { friends: id2 } },
-        { new: true }
-      )
-      await User.findOneAndUpdate(
-        { _id: params.id },
-        { $pull: { friends: id1 } },
-        { new: true }
-      )
-      return res.status(200).json({
-        valid: true,
-        message: 'Deleted from friends'
-      })
-    }
-  } catch (err) {
-    return res.status(400).json({
-      valid: false,
-      message: 'Something go wrong. Try again later'
-    })
-  }
-}
 
 export const index = ({ querymen: { query, select, cursor } }, res, next) =>
   User.countDocuments(query)

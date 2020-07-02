@@ -12,15 +12,12 @@ import {
   show,
   showUserPosts,
   showNearUsers,
-  showUserFriends,
   sendCode,
   verifyCode,
   create,
-  sendFriendRequest,
   update,
   updatePassword,
-  destroy,
-  deleteFriend
+  destroy
 } from './controller'
 import { schema } from './model'
 export User, { schema } from './model'
@@ -36,13 +33,6 @@ const {
   location,
   code
 } = schema.tree
-
-// Show User's friends
-router.get('/friends', token({ required: true }), showUserFriends)
-// Send friendship request
-router.post('/friends/:id', token({ required: true }), sendFriendRequest)
-// Delete user from friends
-router.patch('/friends/:id', token({ required: true }), deleteFriend)
 
 /**
  * @api {get} /users Retrieve users
