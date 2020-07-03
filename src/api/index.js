@@ -4,6 +4,7 @@ import auth from './auth'
 import passwordReset from './password-reset'
 import posts from './posts'
 import friendRequest from './friend-request'
+import friend from './friend'
 
 const router = new Router()
 
@@ -35,5 +36,6 @@ router.use('/auth', auth)
 router.use('/password-resets', passwordReset)
 router.use('/posts', posts)
 router.use('/friend-requests', friendRequest)
+router.use('/friends', friend)
 
 export default router

@@ -1,5 +1,5 @@
 import { FriendRequest } from '.'
-import { User } from '../user/index'
+import { Friend } from '../friend/index'
 import { success, notFound } from '../../services/response'
 
 export const showFriendsRequests = ({ user }, res, next) => {
@@ -15,8 +15,11 @@ export const sendFriendRequest = async ({ user, params }, res) => {
     let existedRequest = await FriendRequest.findOne({
       $and: [{ requester: user._id }, { recipient: params.id }]
     })
-    let isFriends = await User.findOne({
-      friends: { $all: [params.id] }
+    let isFriends = await Friend.findOne({
+      $and: [
+        { friend1: { $in: [user._id, params.id] } },
+        { friend2: { $in: [user._id, params.id] } }
+      ]
     })
     if (existedRequest || isFriends || user._id == params.id) {
       return res.status(418).json({
@@ -47,21 +50,10 @@ export const considerFriendRequest = async ({ body, params, user }, res) => {
     let request = await FriendRequest.findOneAndDelete({
       _id: params.id
     })
-    let id1 = user._id.toString()
-    let id2 = request.requester.toString()
+    if (body.status === 'accept') {
+      await Friend.create({ friend1: request.requester, friend2: user._id })
 
-    if (id1 !== id2 && body.status === 'accept') {
-      await User.findOneAndUpdate(
-        { _id: user._id },
-        { $push: { friends: request.requester } },
-        { new: true }
-      )
-      await User.findOneAndUpdate(
-        { _id: request.requester },
-        { $push: { friends: user._id } },
-        { new: true }
-      )
-      return res.status(200).json({
+      return res.status(201).json({
         valid: true,
         message: 'Added to friends'
       })

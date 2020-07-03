@@ -11,12 +11,6 @@ const friendRequestSchema = new Schema({
     ref: 'User',
     required: true
   }
-  // status: {
-  //   type: String,
-  //   required: true,
-  //   // enums: ['accept', 'reject', 'pending'],
-  //   default: 'pending'
-  // }
 })
 
 friendRequestSchema.methods = {
@@ -25,7 +19,7 @@ friendRequestSchema.methods = {
     let fields = ['id', 'requester', 'recipient']
 
     if (full) {
-      fields = [...fields, 'status']
+      fields = [...fields]
     }
 
     fields.forEach((field) => {
