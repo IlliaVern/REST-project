@@ -13,6 +13,22 @@ const friendSchema = new Schema({
   }
 })
 
+friendSchema.methods = {
+  view(full) {
+    const view = {}
+    let fields = ['id', 'friend1', 'friend2']
+
+    if (full) {
+      fields = [...fields]
+    }
+
+    fields.forEach((field) => {
+      view[field] = this[field]
+    })
+    return view
+  }
+}
+
 const model = mongoose.model('Friend', friendSchema)
 
 export const schema = model.schema

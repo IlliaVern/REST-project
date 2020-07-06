@@ -8,13 +8,13 @@ export const create = ({ user, bodymen: { body } }, res, next) =>
     .catch(next)
 
 export const index = ({ querymen: { query, select, cursor } }, res, next) =>
-  Posts.count(query)
+  Posts.countDocuments(query)
     .then((count) =>
       Posts.find(query, select, cursor)
         .populate('createdBy')
         .then((posts) => ({
-          count,
-          rows: posts.map((posts) => posts.view())
+          rows: posts.map((posts) => posts.view()),
+          count
         }))
     )
     .then(success(res, 200))

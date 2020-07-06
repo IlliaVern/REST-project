@@ -1,17 +1,18 @@
 import { Friend } from '.'
 import { success, notFound } from '../../services/response'
 
-export const showUserFriends = ({ user }, res, next) =>
-  Friend.find({ $or: [{ friend1: user._id }, { friend2: user._id }] })
-    .then(notFound(res))
-    .then((friends) =>
-      friends.map((friend) =>
-        friend.friend1.toString() === user._id.toString()
-          ? friend.friend2
-          : friend.friend1
-      )
+export const showUserFriends = (
+  { querymen: { query, select, cursor } },
+  res,
+  next
+) =>
+  Friend.countDocuments(query)
+    .then((count) =>
+      Friend.find(query, select, cursor).then((friends) => ({
+        rows: friends.map((friend) => friend.view()),
+        count
+      }))
     )
-    .then((friends) => friends.map((friend) => friend.view()))
     .then(success(res, 200))
     .catch(next)
 

@@ -1,14 +1,21 @@
 import { FriendRequest } from '.'
 import { Friend } from '../friend/index'
-import { success, notFound } from '../../services/response'
+import { success } from '../../services/response'
 
-export const showFriendsRequests = ({ user }, res, next) => {
-  FriendRequest.find({ recipient: user._id })
-    .then(notFound(res))
-    .then((requests) => requests.map((request) => request.view()))
+export const showFriendsRequests = (
+  { querymen: { query, select, cursor } },
+  res,
+  next
+) =>
+  FriendRequest.countDocuments(query)
+    .then((count) =>
+      FriendRequest.find(query, select, cursor).then((requests) => ({
+        rows: requests.map((request) => request.view()),
+        count
+      }))
+    )
     .then(success(res, 200))
     .catch(next)
-}
 
 export const sendFriendRequest = async ({ user, params }, res) => {
   try {

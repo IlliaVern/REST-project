@@ -24,21 +24,17 @@ const postsSchema = new Schema(
 
 postsSchema.methods = {
   view(full) {
-    const view = {
-      // simple view
-      id: this.id,
-      createdBy: this.createdBy.view(full),
-      title: this.title,
-      createdAt: this.createdAt,
-      updatedAt: this.updatedAt
+    const view = {}
+    let fields = ['id', 'title']
+
+    if (full) {
+      fields = [...fields, 'createdBy']
     }
 
-    return full
-      ? {
-          ...view
-          // add properties for a full view
-        }
-      : view
+    fields.forEach((field) => {
+      view[field] = this[field]
+    })
+    return view
   }
 }
 

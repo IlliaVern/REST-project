@@ -1,4 +1,5 @@
 import { Router } from 'express'
+import { middleware as query } from 'querymen'
 import { middleware as body } from 'bodymen'
 import { token } from '../../services/passport'
 import {
@@ -13,7 +14,14 @@ const router = new Router()
 const { status } = schema.tree
 
 // Show all friendship requests
-router.get('/', token({ required: true }), showFriendsRequests)
+router.get(
+  '/',
+  token({ required: true }),
+  query({
+    my: { type: String, paths: ['recipient'], operator: '$eq' }
+  }),
+  showFriendsRequests
+)
 
 // Send friendship request
 router.post('/:id', token({ required: true }), sendFriendRequest)
